@@ -1,0 +1,37 @@
+name: Terraform AWS - EKS,ECR Destroy
+
+on:
+  workflow_dispatch:
+
+jobs:
+  destroy:
+    name: Terraform Destroy
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout tf code in runner environment
+      uses: actions/checkout@v3.5.2
+
+    - name: Configure AWS Credentials Action For GitHub Actions
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+       aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+       aws-region: ${{ vars.AWS_REGION }}
+
+    - name: Setup Terraform CLI
+      uses: hashicorp/setup-terraform@v2.0.2
+
+    - name: Set S3 bucket name
+      env:
+        TERRAFORM_BUCKET_NAME: ${{ vars.AWS_TERRAFORM_BUCKET_NAME }}
+      run: |
+        sed -i 's|${TERRAFORM_BUCKET_NAME}|'"$TERRAFORM_BUCKET_NAME"'|g' provider.tf
+
+    - name: Terraform init
+      run: terraform init
+
+    - name: Terraform destroy
+      run: |     
+        terraform destroy -auto-approve
