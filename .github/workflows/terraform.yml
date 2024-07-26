@@ -44,7 +44,7 @@ jobs:
         
     - name: Terraform plan
       run: |     
-        terraform plan -var="dbUserName=${{ secrets.DB_USER }}" -var="dbPassword=${{ secrets.DB_PASSWORD }}"
+        terraform plan
 
   apply:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
